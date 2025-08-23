@@ -69,15 +69,15 @@ st.markdown("""
         background-color: #262730;
     }
     
-    /* Clean chat interface styling - no borders or grids */
-    .stChatMessage {
-        background-color: transparent;
-        border-radius: 0;
-        padding: 8px 0;
-        margin: 4px 0;
-        border: none;
-        box-shadow: none;
-    }
+         /* Clean chat interface styling - no borders or grids */
+     .stChatMessage {
+         background-color: transparent;
+         border-radius: 0;
+         padding: 4px 0;
+         margin: 2px 0;
+         border: none;
+         box-shadow: none;
+     }
     
     .stChatMessage[data-testid="chatMessage"] {
         background-color: transparent;
@@ -135,47 +135,58 @@ st.markdown("""
         outline: none;
     }
     
-    /* Button styling */
-    .stButton > button {
-        background-color: transparent;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 6px 12px;
-        font-weight: 400;
-        transition: background-color 0.2s;
-        text-align: left;
-    }
+         /* Button styling */
+     .stButton > button {
+         background-color: transparent;
+         color: white;
+         border: none;
+         border-radius: 4px;
+         padding: 4px 8px;
+         font-weight: 400;
+         transition: background-color 0.2s;
+         text-align: left;
+         font-size: 0.9rem;
+     }
     .stButton > button:hover {
         background-color: #374151;
     }
     
-    /* Title styling */
-    h1 {
-        color: white;
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
+         /* Title styling */
+     h1 {
+         color: white;
+         font-size: 1.8rem;
+         font-weight: 600;
+         margin-bottom: 1rem;
+         text-align: center;
+     }
     
 
     
-    /* Sidebar styling */
-    .css-1d391kg {
-        background-color: #262730;
-    }
+         /* Sidebar styling */
+     .css-1d391kg {
+         background-color: #262730;
+     }
+     
+     /* Reduce spacing in sidebar */
+     .sidebar .sidebar-content .stButton {
+         margin-bottom: 2px;
+     }
+     
+     /* Reduce container spacing */
+     .stContainer {
+         margin-bottom: 4px;
+     }
     
-    /* Remove default margins and padding */
-    .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 6rem;
-    }
-    
-    /* Chat container styling */
-    .stContainer {
-        margin-bottom: 80px;
-    }
+         /* Remove default margins and padding */
+     .main .block-container {
+         padding-top: 1rem;
+         padding-bottom: 6rem;
+     }
+     
+     /* Chat container styling */
+     .stContainer {
+         margin-bottom: 60px;
+     }
 
 </style>
 """, unsafe_allow_html=True)
@@ -520,7 +531,7 @@ with st.sidebar:
             create_new_conversation()
             st.rerun()
     with col2:
-        st.markdown("<p style='color: white; margin: 0; padding-top: 8px;'>New chat</p>", unsafe_allow_html=True)
+         st.markdown("<p style='color: white; margin: 0; padding-top: 4px; font-size: 0.9rem;'>New chat</p>", unsafe_allow_html=True)
     
     st.markdown("---")
     
