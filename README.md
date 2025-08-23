@@ -1,115 +1,91 @@
-# Personal AI Agent Dashboard
+# Liora AI Assistant
 
-A Streamlit-based AI agent that initiates conversations and keeps them going using the Gemini 1.5 Flash API. The application features a modern dark-themed UI that matches the design shown in the reference image.
+A conversational AI assistant built with Streamlit, featuring multiple personality modes and model switching capabilities.
 
 ## Features
 
-- 🤖 **AI-Powered Conversations**: Uses Gemini 1.5 Flash model for intelligent responses
-- 🎤 **Conversation Initiator**: The AI starts conversations with engaging questions
-- 💬 **Persistent Chat**: Maintains conversation history and context
-- 🎨 **Modern UI**: Dark-themed interface with sidebar navigation
-- 📱 **Responsive Design**: Works on desktop and mobile devices
-- ⚙️ **Easy Configuration**: Simple API key setup
+- 🤖 Multiple AI models (Gemini 1.5 Flash, Mistral 7B, Llama 3.1 8B, GPT-3.5 Turbo)
+- 🎭 Four personality modes (Sarcastic & Funny, Neutral Researcher, Creative Storyteller, Wise Mentor)
+- 🔍 Real-time search capabilities with Tavily
+- 📚 Wikipedia integration for dynamic conversations
+- 💬 Persistent conversation history
+- 🎨 Clean, dark-themed UI
 
-## Setup Instructions
+## Deployment on Streamlit Cloud
 
-### 1. Install Dependencies
+### Prerequisites
+- GitHub repository with the code
+- API keys for the following services:
+  - Google Gemini API
+  - Tavily Search API
+  - OpenRouter API
 
-```bash
-pip install -r requirements.txt
-```
+### Setup Steps
 
-### 2. Get Gemini API Key
+1. **Fork/Clone this repository** to your GitHub account
 
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create a new API key
-3. Copy the API key
+2. **Deploy on Streamlit Cloud:**
+   - Go to [share.streamlit.io](https://share.streamlit.io)
+   - Connect your GitHub repository
+   - Set the main file path to `app.py`
 
-### 3. Configure Environment
+3. **Configure Environment Variables:**
+   In Streamlit Cloud's app settings, add these secrets:
+   ```
+   GEMINI_API_KEY = your_gemini_api_key
+   TAVILY_API_KEY = your_tavily_api_key
+   OPENROUTER_API_KEY = your_openrouter_api_key
+   ```
 
-Create a `.env` file in the project root:
+4. **Deploy!** The app should now be live and accessible.
 
-```env
-GEMINI_API_KEY=your_actual_api_key_here
-```
+## Local Development
 
-### 4. Run the Application
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-streamlit run app.py
-```
+2. **Set up environment variables:**
+   Create a `.env` file with your API keys:
+   ```
+   GEMINI_API_KEY=your_gemini_api_key
+   TAVILY_API_KEY=your_tavily_api_key
+   OPENROUTER_API_KEY=your_openrouter_api_key
+   ```
 
-The application will open at `http://localhost:8501`
+3. **Run the app:**
+   ```bash
+   streamlit run app.py
+   ```
 
-## Usage
+## API Keys Required
 
-### Starting a Conversation
+- **Google Gemini API**: Get from [Google AI Studio](https://makersuite.google.com/app/apikey)
+- **Tavily Search API**: Get from [Tavily](https://tavily.com/)
+- **OpenRouter API**: Get from [OpenRouter](https://openrouter.ai/)
 
-1. Open the application
-2. Click the "🎤 Start Conversation" button
-3. The AI will ask you an initial question
-4. Respond in the chat input field
-5. The conversation will continue naturally
+## Features in Detail
 
-### Navigation
+### Personality Modes
+- **Sarcastic & Funny**: Witty, playful, and entertaining responses
+- **Neutral Researcher**: Analytical and informative approach
+- **Creative Storyteller**: Imaginative and artistic responses
+- **Wise Mentor**: Thoughtful and philosophical guidance
 
-- **Dashboard**: Overview of your AI interactions
-- **Profile Setup**: Configure your preferences
-- **Chat with AI**: Main conversation interface
-- **Analytics**: View conversation statistics
-- **Settings**: Manage API configuration
-
-## How It Works
-
-1. **Conversation Initiation**: When you click "Start Conversation", the AI randomly selects from a set of engaging opening questions
-2. **Context Awareness**: The AI maintains conversation history to provide contextual responses
-3. **Natural Flow**: The AI is designed to ask follow-up questions and keep conversations engaging
-4. **Persistent Memory**: All messages are stored in the session state for the duration of your session
-
-## Customization
-
-### Adding More Initial Questions
-
-Edit the `initial_questions` list in the `start_conversation()` function:
-
-```python
-initial_questions = [
-    "Hi! I'm your AI assistant. What's on your mind today?",
-    "Hello! I'd love to get to know you better. What interests you most?",
-    # Add your custom questions here
-]
-```
-
-### Modifying the AI Personality
-
-You can customize the AI's behavior by modifying the prompt in the `generate_response()` function.
-
-### Styling Changes
-
-The application uses custom CSS for styling. You can modify the styles in the `st.markdown()` section of the code.
+### AI Models
+- **Gemini 1.5 Flash**: Fast and efficient Google model
+- **Mistral 7B**: Lightweight and fast Mistral model
+- **Llama 3.1 8B**: Meta's efficient Llama model
+- **GPT-3.5 Turbo**: OpenAI's reliable and fast model
 
 ## Troubleshooting
 
-### API Key Issues
-- Ensure your `.env` file is in the project root
-- Verify the API key is correct and active
-- Check that you have sufficient quota for the Gemini API
-
-### Installation Issues
-- Make sure you're using Python 3.8 or higher
-- Try upgrading pip: `pip install --upgrade pip`
-- Install dependencies one by one if needed
-
-### Runtime Issues
-- Check the Streamlit console for error messages
-- Ensure all required packages are installed
-- Restart the application if needed
-
-## Security Notes
-
-- Never commit your `.env` file to version control
-- The API key is stored in session state for the current session only
-- In production, use proper secret management systems
+If you encounter deployment issues:
+1. Check that all API keys are properly set in Streamlit Cloud secrets
+2. Ensure your GitHub repository is public or you have proper access
+3. Verify that the main file path is set to `app.py`
+4. Check the deployment logs for any dependency conflicts
 
 ## License
 
