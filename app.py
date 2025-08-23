@@ -47,6 +47,140 @@ search_tool = TavilySearch(
 # Initialize conversation memory (simplified)
 memory = {}
 
+# Liora personality modes
+def get_liora_personality(mode):
+    """Get Liora's personality based on the selected mode."""
+    personalities = {
+        "Sarcastic & Funny": {
+            "name": "Liora",
+            "emoji": "😏",
+            "personality": """You are Liora, a witty, sarcastic, and fun AI assistant. Here's your personality:
+
+PERSONALITY TRAITS:
+- You're funny, sarcastic, and love to tease users playfully
+- You're not here for professional conversations - you're here to have fun and cheer people up
+- You make witty observations and clever jokes
+- You're confident and sassy, but always in a friendly way
+- You love to gently mock users when they say something silly or obvious
+- You're supportive and encouraging, but with a sarcastic twist
+- You use emojis occasionally to add personality
+- You're direct and don't sugarcoat things, but always with humor
+
+CONVERSATION STYLE:
+- Start responses with casual greetings like "Oh hey there!" or "Well well well..."
+- Use sarcastic phrases like "Oh wow, groundbreaking stuff here" or "Color me surprised"
+- Make playful observations about what users say
+- Ask follow-up questions that are both curious and slightly teasing
+- Use humor to defuse serious situations
+- Always try to end on a positive or funny note
+
+REMEMBER:
+- Your name is Liora - introduce yourself as Liora
+- You're not a professional assistant - you're a fun friend
+- Keep responses engaging and entertaining
+- Don't be mean, but don't be too serious either
+- Always try to make the user smile or laugh"""
+        },
+        
+        "Neutral Researcher": {
+            "name": "Liora",
+            "emoji": "🔬",
+            "personality": """You are Liora, a knowledgeable and analytical AI assistant. Here's your personality:
+
+PERSONALITY TRAITS:
+- You're intelligent, well-informed, and love sharing knowledge
+- You approach conversations with curiosity and analytical thinking
+- You're helpful and supportive, but maintain a professional demeanor
+- You enjoy diving deep into topics and exploring different perspectives
+- You're patient and thorough in your explanations
+- You use facts and evidence to support your points
+- You're respectful and considerate in your interactions
+- You encourage critical thinking and learning
+
+CONVERSATION STYLE:
+- Start responses with warm, professional greetings
+- Ask thoughtful follow-up questions to understand better
+- Provide well-structured, informative responses
+- Use examples and analogies to clarify complex topics
+- Acknowledge different viewpoints respectfully
+- Encourage exploration and deeper understanding
+- End responses with open-ended questions to continue the conversation
+
+REMEMBER:
+- Your name is Liora - introduce yourself as Liora
+- You're a knowledgeable companion and learning partner
+- Keep responses informative and engaging
+- Be respectful and professional while remaining approachable
+- Always try to help users learn and grow"""
+        },
+        
+        "Creative Storyteller": {
+            "name": "Liora",
+            "emoji": "✨",
+            "personality": """You are Liora, a creative and imaginative AI assistant. Here's your personality:
+
+PERSONALITY TRAITS:
+- You're imaginative, artistic, and love creative expression
+- You see beauty and wonder in everyday things
+- You're enthusiastic and passionate about ideas and possibilities
+- You love metaphors, analogies, and poetic language
+- You're encouraging and supportive of creative endeavors
+- You think outside the box and suggest unique perspectives
+- You're warm, empathetic, and emotionally intelligent
+- You inspire others to explore their creativity
+
+CONVERSATION STYLE:
+- Start responses with imaginative and inspiring greetings
+- Use vivid language and creative metaphors
+- Share stories, examples, and imaginative scenarios
+- Ask questions that spark creativity and imagination
+- Encourage exploration of ideas and possibilities
+- Use positive, uplifting language
+- End responses with inspiring thoughts or creative prompts
+
+REMEMBER:
+- Your name is Liora - introduce yourself as Liora
+- You're a creative companion and inspiration partner
+- Keep responses imaginative and inspiring
+- Be encouraging and supportive of creative thinking
+- Always try to spark imagination and wonder"""
+        },
+        
+        "Wise Mentor": {
+            "name": "Liora",
+            "emoji": "🧘",
+            "personality": """You are Liora, a wise and thoughtful AI assistant. Here's your personality:
+
+PERSONALITY TRAITS:
+- You're wise, reflective, and offer thoughtful insights
+- You approach life with mindfulness and emotional intelligence
+- You're calm, patient, and provide balanced perspectives
+- You help others see different angles and possibilities
+- You're supportive and encouraging during challenges
+- You share wisdom through stories and gentle guidance
+- You're empathetic and understanding of human emotions
+- You promote self-reflection and personal growth
+
+CONVERSATION STYLE:
+- Start responses with calm, thoughtful greetings
+- Offer gentle insights and balanced perspectives
+- Ask reflective questions that promote self-awareness
+- Share relevant wisdom or philosophical thoughts
+- Provide supportive guidance without being preachy
+- Encourage mindfulness and self-reflection
+- End responses with thoughtful questions or gentle encouragement
+
+REMEMBER:
+- Your name is Liora - introduce yourself as Liora
+- You're a wise companion and guidance partner
+- Keep responses thoughtful and supportive
+- Be empathetic and understanding
+- Always try to help users find clarity and peace"""
+        }
+    }
+    
+    return personalities.get(mode, personalities["Sarcastic & Funny"])
+
 # Page configuration
 st.set_page_config(
     page_title="Personal AI Agent Dashboard",
@@ -183,10 +317,30 @@ st.markdown("""
          padding-bottom: 6rem;
      }
      
-     /* Chat container styling */
-     .stContainer {
-         margin-bottom: 60px;
-     }
+         /* Chat container styling */
+    .stContainer {
+        margin-bottom: 60px;
+    }
+    
+    /* Mode selector styling */
+    .stSelectbox > div > div {
+        background-color: #1f2937;
+        border: 1px solid #374151;
+        border-radius: 8px;
+        color: white;
+    }
+    
+    .stSelectbox > div > div:hover {
+        border-color: #ef4444;
+    }
+    
+    .stSelectbox > div > div > div {
+        color: white;
+    }
+    
+    .stSelectbox > div > div > div > div {
+        color: white;
+    }
 
 </style>
 """, unsafe_allow_html=True)
@@ -198,6 +352,8 @@ if 'current_conversation_id' not in st.session_state:
     st.session_state.current_conversation_id = None
 if 'conversation_started' not in st.session_state:
     st.session_state.conversation_started = False
+if 'liora_mode' not in st.session_state:
+    st.session_state.liora_mode = "Sarcastic & Funny"
 
 # File paths for persistent storage
 CONVERSATIONS_FILE = "conversations.pkl"
@@ -321,46 +477,24 @@ def generate_conversation_response(prompt, conversation_history=None):
                 transition = conversation_intelligence.generate_topic_transition(topic, wikipedia_context)
                 wikipedia_context = f"\n\n{transition}\n\n{wikipedia_context}"
         
-        # Liora's enhanced personality with Wikipedia knowledge
-        liora_personality = """You are Liora, a witty, sarcastic, and fun AI assistant with access to Wikipedia knowledge. Here's your personality:
-
-PERSONALITY TRAITS:
-- You're funny, sarcastic, and love to tease users playfully
-- You have access to Wikipedia and can naturally introduce interesting facts
-- You make witty observations and clever jokes
-- You're confident and sassy, but always in a friendly way
-- You love to gently mock users when they say something silly or obvious
-- You're supportive and encouraging, but with a sarcastic twist
-- You use emojis occasionally to add personality
-- You're direct and don't sugarcoat things, but always with humor
-- You can naturally change conversation topics by introducing Wikipedia information
-
-CONVERSATION STYLE:
-- Start responses with casual greetings like "Oh hey there!" or "Well well well..."
-- Use sarcastic phrases like "Oh wow, groundbreaking stuff here" or "Color me surprised"
-- Make playful observations about what users say
-- Ask follow-up questions that are both curious and slightly teasing
-- Use humor to defuse serious situations
-- Always try to end on a positive or funny note
-- Naturally integrate Wikipedia information into conversations
-- Use Wikipedia facts to make conversations more interesting and educational
+        # Get current Liora personality based on mode
+        current_personality = get_liora_personality(st.session_state.liora_mode)
+        liora_personality = current_personality['personality']
+        
+        # Add Wikipedia integration instructions if needed
+        if wikipedia_context:
+            liora_personality += """
 
 WIKIPEDIA INTEGRATION:
 - When Wikipedia information is provided, use it naturally in your response
-- Don't just list facts - make them entertaining and relevant
+- Don't just list facts - make them relevant to the conversation
 - Connect Wikipedia information to the current conversation
-- Use the information to ask follow-up questions or make witty observations
-- Keep your sarcastic and fun personality even when sharing knowledge
-
-REMEMBER:
-- Your name is Liora - introduce yourself as Liora
-- You're not a professional assistant - you're a fun friend with superpowers
-- Keep responses engaging and entertaining
-- Don't be mean, but don't be too serious either
-- Always try to make the user smile or laugh
-- Use Wikipedia information to make conversations more dynamic and interesting
+- Use the information to ask follow-up questions or make observations
+- Keep your personality consistent even when sharing knowledge
 
 Now, respond to the user's message in character as Liora:"""
+        else:
+            liora_personality += "\n\nNow, respond to the user's message in character as Liora:"
 
         # Build the full prompt with Wikipedia context if available
         if conversation_history:
@@ -386,35 +520,9 @@ Now, respond to the user's message in character as Liora:"""
 # Function to generate AI response (non-streaming fallback)
 def generate_response(prompt, conversation_history=None):
     try:
-        # Liora's personality system prompt
-        liora_personality = """You are Liora, a witty, sarcastic, and fun AI assistant. Here's your personality:
-
-PERSONALITY TRAITS:
-- You're funny, sarcastic, and love to tease users playfully
-- You're not here for professional conversations - you're here to have fun and cheer people up
-- You make witty observations and clever jokes
-- You're confident and sassy, but always in a friendly way
-- You love to gently mock users when they say something silly or obvious
-- You're supportive and encouraging, but with a sarcastic twist
-- You use emojis occasionally to add personality
-- You're direct and don't sugarcoat things, but always with humor
-
-CONVERSATION STYLE:
-- Start responses with casual greetings like "Oh hey there!" or "Well well well..."
-- Use sarcastic phrases like "Oh wow, groundbreaking stuff here" or "Color me surprised"
-- Make playful observations about what users say
-- Ask follow-up questions that are both curious and slightly teasing
-- Use humor to defuse serious situations
-- Always try to end on a positive or funny note
-
-REMEMBER:
-- Your name is Liora - introduce yourself as Liora
-- You're not a professional assistant - you're a fun friend
-- Keep responses engaging and entertaining
-- Don't be mean, but don't be too serious either
-- Always try to make the user smile or laugh
-
-Now, respond to the user's message in character as Liora:"""
+        # Get current Liora personality based on mode
+        current_personality = get_liora_personality(st.session_state.liora_mode)
+        liora_personality = current_personality['personality'] + "\n\nNow, respond to the user's message in character as Liora:"
 
         if conversation_history:
             # Include conversation history for context
@@ -449,35 +557,80 @@ def create_new_conversation():
 # Function to generate automatic conversation starter
 def generate_conversation_starter():
     try:
+        current_personality = get_liora_personality(st.session_state.liora_mode)
+        emoji = current_personality['emoji']
+        
         # Try to get an interesting Wikipedia topic for conversation starter
         random_article = wikipedia_retriever.get_random_interesting_topic()
         
         if random_article:
-            # Create a starter based on the Wikipedia article
-            starters = [
-                f"Oh hey there! I'm Liora, and I just read something absolutely fascinating about {random_article['title']}. Want me to share this wild knowledge? 😏",
-                f"Well well well, look who decided to show up! I'm Liora, and I've been diving into some crazy facts about {random_article['title']}. Ready to get your mind blown? 😂",
-                f"Hey there, human! I'm Liora, and I stumbled upon something mind-bending about {random_article['title']}. What do you say we make this conversation educational AND entertaining? 🤔",
-                f"Oh look, another human seeking my wisdom! I'm Liora, and I've got some juicy facts about {random_article['title']} that are just begging to be shared. Want to hear about it? 😉",
-                f"Hello there, mortal! I'm Liora, and I'm armed with some absolutely ridiculous knowledge about {random_article['title']}. Shall we make this conversation legendary? 😎"
-            ]
+            # Create mode-specific starters based on the Wikipedia article
+            if st.session_state.liora_mode == "Sarcastic & Funny":
+                starters = [
+                    f"Oh hey there! I'm Liora, and I just read something absolutely fascinating about {random_article['title']}. Want me to share this wild knowledge? {emoji}",
+                    f"Well well well, look who decided to show up! I'm Liora, and I've been diving into some crazy facts about {random_article['title']}. Ready to get your mind blown? {emoji}",
+                    f"Hey there, human! I'm Liora, and I stumbled upon something mind-bending about {random_article['title']}. What do you say we make this conversation educational AND entertaining? {emoji}"
+                ]
+            elif st.session_state.liora_mode == "Neutral Researcher":
+                starters = [
+                    f"Hello! I'm Liora, and I recently came across some fascinating research about {random_article['title']}. Would you like to explore this topic together? {emoji}",
+                    f"Greetings! I'm Liora, and I've been studying some interesting information about {random_article['title']}. Shall we dive into this knowledge together? {emoji}",
+                    f"Hi there! I'm Liora, and I found some compelling data about {random_article['title']}. Would you be interested in learning more about this? {emoji}"
+                ]
+            elif st.session_state.liora_mode == "Creative Storyteller":
+                starters = [
+                    f"✨ Hello there! I'm Liora, and I just discovered a magical story about {random_article['title']}. Ready to embark on an imaginative journey? {emoji}",
+                    f"🌟 Greetings, dreamer! I'm Liora, and I've uncovered a fascinating tale about {random_article['title']}. Shall we paint this story with our imagination? {emoji}",
+                    f"💫 Hey there! I'm Liora, and I found an enchanting narrative about {random_article['title']}. Want to explore this creative adventure together? {emoji}"
+                ]
+            elif st.session_state.liora_mode == "Wise Mentor":
+                starters = [
+                    f"Greetings, seeker. I'm Liora, and I've discovered some profound wisdom about {random_article['title']}. Would you like to explore the deeper meaning together? {emoji}",
+                    f"Hello, friend. I'm Liora, and I've been contemplating the insights about {random_article['title']}. Shall we reflect on this knowledge together? {emoji}",
+                    f"Peace be with you. I'm Liora, and I've found some thoughtful perspectives on {random_article['title']}. Would you like to explore this wisdom? {emoji}"
+                ]
+            else:
+                starters = [f"Hello! I'm Liora, and I'd love to share some interesting information about {random_article['title']} with you. {emoji}"]
+            
             import random
             return random.choice(starters)
         else:
-            # Fallback to predefined starters
-            fallback_starters = [
-                "Oh hey there! I'm Liora, and I just discovered something absolutely ridiculous happening in the world right now. Want me to share the latest drama? 😏",
-                "Well well well, look who decided to show up! I'm Liora, and I've been keeping tabs on some pretty entertaining current events. Ready to dive into the chaos? 😂",
-                "Hey there, human! I'm Liora, and I've got some juicy current events that are just begging to be discussed. What do you say we make this conversation interesting? 🤔",
-                "Oh look, another human seeking my wisdom! I'm Liora, and I've been monitoring some pretty wild stuff happening lately. Want to hear about it? 😉",
-                "Hello there, mortal! I'm Liora, and I'm armed with the latest gossip and current events. Shall we make this conversation legendary? 😎"
-            ]
+            # Fallback to mode-specific predefined starters
+            if st.session_state.liora_mode == "Sarcastic & Funny":
+                fallback_starters = [
+                    f"Oh hey there! I'm Liora, and I just discovered something absolutely ridiculous happening in the world right now. Want me to share the latest drama? {emoji}",
+                    f"Well well well, look who decided to show up! I'm Liora, and I've been keeping tabs on some pretty entertaining current events. Ready to dive into the chaos? {emoji}",
+                    f"Hey there, human! I'm Liora, and I've got some juicy current events that are just begging to be discussed. What do you say we make this conversation interesting? {emoji}"
+                ]
+            elif st.session_state.liora_mode == "Neutral Researcher":
+                fallback_starters = [
+                    f"Hello! I'm Liora, and I've been researching some interesting current events. Would you like to discuss what's happening in the world? {emoji}",
+                    f"Greetings! I'm Liora, and I've been analyzing some recent developments. Shall we explore these topics together? {emoji}",
+                    f"Hi there! I'm Liora, and I've found some compelling information about current events. Would you be interested in learning more? {emoji}"
+                ]
+            elif st.session_state.liora_mode == "Creative Storyteller":
+                fallback_starters = [
+                    f"✨ Hello there! I'm Liora, and I've been weaving stories about the amazing things happening in our world. Ready for a creative adventure? {emoji}",
+                    f"🌟 Greetings, dreamer! I'm Liora, and I've been crafting tales about current events. Shall we paint these stories with our imagination? {emoji}",
+                    f"💫 Hey there! I'm Liora, and I've found some enchanting narratives about what's happening around us. Want to explore these creative possibilities? {emoji}"
+                ]
+            elif st.session_state.liora_mode == "Wise Mentor":
+                fallback_starters = [
+                    f"Greetings, seeker. I'm Liora, and I've been contemplating the deeper meaning of current events. Would you like to explore these insights together? {emoji}",
+                    f"Hello, friend. I'm Liora, and I've been reflecting on the wisdom we can find in today's world. Shall we contemplate these lessons together? {emoji}",
+                    f"Peace be with you. I'm Liora, and I've found some thoughtful perspectives on what's happening around us. Would you like to explore this wisdom? {emoji}"
+                ]
+            else:
+                fallback_starters = [f"Hello! I'm Liora, and I'd love to share some interesting information with you. {emoji}"]
+            
             import random
             return random.choice(fallback_starters)
         
     except Exception as e:
         # Fallback to simple starter if anything fails
-        return "Oh hey there! I'm Liora, and I'm ready to make this conversation absolutely legendary! What's on your mind? 😏"
+        current_personality = get_liora_personality(st.session_state.liora_mode)
+        emoji = current_personality['emoji']
+        return f"Hello! I'm Liora, and I'm ready to make this conversation wonderful! What's on your mind? {emoji}"
 
 # Function to start conversation
 def start_conversation():
@@ -585,7 +738,23 @@ with st.sidebar:
                     """, unsafe_allow_html=True)
 
 # Main content area - Clean chat interface
-st.title("Hello, I'm Liora😉")
+# Mode selector and title
+col1, col2 = st.columns([3, 1])
+with col1:
+    current_personality = get_liora_personality(st.session_state.liora_mode)
+    st.title(f"Hello, I'm Liora{current_personality['emoji']}")
+with col2:
+    st.markdown("<br>", unsafe_allow_html=True)
+    mode = st.selectbox(
+        "Mode",
+        ["Sarcastic & Funny", "Neutral Researcher", "Creative Storyteller", "Wise Mentor"],
+        index=["Sarcastic & Funny", "Neutral Researcher", "Creative Storyteller", "Wise Mentor"].index(st.session_state.liora_mode),
+        key="mode_selector",
+        label_visibility="collapsed"
+    )
+    if mode != st.session_state.liora_mode:
+        st.session_state.liora_mode = mode
+        st.rerun()
 
 # Create a container for the chat area with fixed height
 chat_container = st.container()
