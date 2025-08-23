@@ -535,18 +535,87 @@ st.markdown("""
         margin: 0;
     }
     
-    /* Input field styling */
-    .stChatInput {
-        position: fixed;
-        bottom: 20px;
-        left: 300px;
-        right: 20px;
-        background-color: #1f2937;
-        border: none;
-        border-radius: 12px;
-        padding: 12px;
-        z-index: 1000;
-    }
+         /* Input field styling */
+     .stChatInput {
+         position: fixed;
+         bottom: 20px;
+         left: 20px;
+         right: 20px;
+         background-color: #1f2937;
+         border: none;
+         border-radius: 12px;
+         padding: 12px;
+         z-index: 1000;
+     }
+     
+     /* Mobile responsive adjustments */
+     @media (max-width: 768px) {
+         .stChatInput {
+             left: 10px;
+             right: 10px;
+             bottom: 10px;
+             padding: 8px;
+         }
+         
+         /* Adjust sidebar for mobile */
+         .css-1d391kg {
+             width: 100% !important;
+             max-width: 100% !important;
+         }
+         
+         /* Make sidebar full width on mobile */
+         .css-1lcbmhc {
+             width: 100% !important;
+         }
+         
+         /* Adjust main content area */
+         .main .block-container {
+             padding-left: 1rem;
+             padding-right: 1rem;
+             padding-bottom: 8rem;
+         }
+         
+         /* Reduce title size on mobile */
+         h1 {
+             font-size: 1.8rem !important;
+             margin-bottom: 1rem !important;
+         }
+         
+         /* Adjust button sizes for mobile */
+         .stButton > button {
+             font-size: 0.8rem;
+             padding: 6px 12px;
+         }
+         
+         /* Make selectors more mobile-friendly */
+         .stSelectbox > div > div {
+             min-height: 40px;
+             font-size: 0.9rem;
+         }
+         
+         /* Adjust sidebar spacing for mobile */
+         .sidebar .stSelectbox {
+             margin-bottom: 0.8rem;
+         }
+         
+         /* Make conversation buttons more touch-friendly */
+         .stButton > button {
+             min-height: 44px;
+             padding: 8px 12px;
+         }
+     }
+     
+     /* Tablet responsive adjustments */
+     @media (min-width: 769px) and (max-width: 1024px) {
+         .stChatInput {
+             left: 250px;
+             right: 20px;
+         }
+         
+         .main .block-container {
+             padding-bottom: 6rem;
+         }
+     }
     
     .stChatInputContainer {
         background-color: #1f2937;
@@ -639,6 +708,84 @@ st.markdown("""
      .main .block-container {
          padding-top: 1rem;
          padding-bottom: 6rem;
+     }
+     
+     /* Mobile-specific improvements */
+     @media (max-width: 768px) {
+         /* Hide sidebar on mobile by default, show as overlay */
+         .css-1d391kg {
+             position: fixed;
+             top: 0;
+             left: -100%;
+             width: 100% !important;
+             height: 100vh;
+             z-index: 9999;
+             transition: left 0.3s ease;
+             background-color: #262730;
+             overflow-y: auto;
+         }
+         
+         /* Show sidebar when active */
+         .css-1d391kg.show {
+             left: 0;
+         }
+         
+         /* Add hamburger menu button */
+         .mobile-menu-toggle {
+             position: fixed;
+             top: 10px;
+             left: 10px;
+             z-index: 10000;
+             background: #1f2937;
+             border: none;
+             color: white;
+             padding: 8px;
+             border-radius: 4px;
+             cursor: pointer;
+         }
+         
+         /* Adjust main content for mobile */
+         .main .block-container {
+             padding-top: 4rem;
+             padding-left: 1rem;
+             padding-right: 1rem;
+             padding-bottom: 8rem;
+         }
+         
+         /* Make chat messages more mobile-friendly */
+         .stChatMessage {
+             padding: 8px 0;
+             margin: 4px 0;
+         }
+         
+         /* Adjust input field for mobile */
+         .stChatInput input {
+             font-size: 16px; /* Prevents zoom on iOS */
+             padding: 12px;
+         }
+         
+              /* Make buttons more touch-friendly */
+     .stButton > button {
+         min-height: 44px;
+         min-width: 44px;
+     }
+     
+     /* Ensure proper spacing for mobile */
+     .stChatMessageContent {
+         word-wrap: break-word;
+         overflow-wrap: break-word;
+     }
+     
+     /* Improve mobile scrolling */
+     .main .block-container {
+         overflow-x: hidden;
+     }
+     
+     /* Better mobile input handling */
+     .stChatInput input:focus {
+         outline: 2px solid #ef4444;
+         outline-offset: 2px;
+     }
      }
      
          /* Chat container styling */
@@ -1097,6 +1244,45 @@ def update_conversation_title(conversation_id, new_title):
 
 # Sidebar - Conversation Management and Controls
 with st.sidebar:
+    # Mobile close button
+    st.markdown("""
+    <div style="display: none;" class="mobile-close-btn" onclick="closeSidebar()">
+        ✕
+    </div>
+    <script>
+    function closeSidebar() {
+        const sidebar = document.querySelector('.css-1d391kg');
+        if (sidebar) {
+            sidebar.classList.remove('show');
+        }
+    }
+    
+    // Show close button on mobile
+    if (window.innerWidth <= 768) {
+        document.querySelector('.mobile-close-btn').style.display = 'block';
+    }
+    </script>
+    <style>
+    .mobile-close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        z-index: 10001;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # New conversation button - minimalistic design
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -1197,6 +1383,37 @@ with st.sidebar:
 
 # Main content area - Clean chat interface with centered heading
 current_personality = get_liora_personality(st.session_state.liora_mode)
+
+# Mobile menu toggle button
+st.markdown("""
+<div class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none;">
+    ☰
+</div>
+<script>
+function toggleSidebar() {
+    const sidebar = document.querySelector('.css-1d391kg');
+    if (sidebar) {
+        sidebar.classList.toggle('show');
+    }
+}
+
+// Show mobile menu button on small screens
+if (window.innerWidth <= 768) {
+    document.querySelector('.mobile-menu-toggle').style.display = 'block';
+}
+
+// Close sidebar when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.css-1d391kg') && !e.target.closest('.mobile-menu-toggle')) {
+        const sidebar = document.querySelector('.css-1d391kg');
+        if (sidebar && sidebar.classList.contains('show')) {
+            sidebar.classList.remove('show');
+        }
+    }
+});
+</script>
+""", unsafe_allow_html=True)
+
 st.markdown(
     f"<h1 style='text-align: center; margin-bottom: 2rem; color: white; font-size: 2.5rem;'>Hello, I'm Liora {current_personality['emoji']}</h1>", 
     unsafe_allow_html=True
