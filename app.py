@@ -786,6 +786,47 @@ st.markdown("""
          outline: 2px solid #ef4444;
          outline-offset: 2px;
      }
+     
+     /* Mobile JavaScript functionality */
+     </style>
+     <script>
+     // Mobile sidebar functionality
+     function toggleSidebar() {
+         const sidebar = document.querySelector('.css-1d391kg');
+         if (sidebar) {
+             sidebar.classList.toggle('show');
+         }
+     }
+     
+     function closeSidebar() {
+         const sidebar = document.querySelector('.css-1d391kg');
+         if (sidebar) {
+             sidebar.classList.remove('show');
+         }
+     }
+     
+     // Initialize mobile elements
+     document.addEventListener('DOMContentLoaded', function() {
+         // Show mobile menu button on small screens
+         if (window.innerWidth <= 768) {
+             const menuToggle = document.querySelector('.mobile-menu-toggle');
+             const closeBtn = document.querySelector('.mobile-close-btn');
+             if (menuToggle) menuToggle.style.display = 'block';
+             if (closeBtn) closeBtn.style.display = 'block';
+         }
+         
+         // Close sidebar when clicking outside
+         document.addEventListener('click', function(e) {
+             if (!e.target.closest('.css-1d391kg') && !e.target.closest('.mobile-menu-toggle')) {
+                 const sidebar = document.querySelector('.css-1d391kg');
+                 if (sidebar && sidebar.classList.contains('show')) {
+                     sidebar.classList.remove('show');
+                 }
+             }
+         });
+     });
+     </script>
+     <style>
      }
      
          /* Chat container styling */
@@ -1249,19 +1290,6 @@ with st.sidebar:
     <div style="display: none;" class="mobile-close-btn" onclick="closeSidebar()">
         ✕
     </div>
-    <script>
-    function closeSidebar() {
-        const sidebar = document.querySelector('.css-1d391kg');
-        if (sidebar) {
-            sidebar.classList.remove('show');
-        }
-    }
-    
-    // Show close button on mobile
-    if (window.innerWidth <= 768) {
-        document.querySelector('.mobile-close-btn').style.display = 'block';
-    }
-    </script>
     <style>
     .mobile-close-btn {
         position: absolute;
@@ -1389,29 +1417,6 @@ st.markdown("""
 <div class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none;">
     ☰
 </div>
-<script>
-function toggleSidebar() {
-    const sidebar = document.querySelector('.css-1d391kg');
-    if (sidebar) {
-        sidebar.classList.toggle('show');
-    }
-}
-
-// Show mobile menu button on small screens
-if (window.innerWidth <= 768) {
-    document.querySelector('.mobile-menu-toggle').style.display = 'block';
-}
-
-// Close sidebar when clicking outside
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.css-1d391kg') && !e.target.closest('.mobile-menu-toggle')) {
-        const sidebar = document.querySelector('.css-1d391kg');
-        if (sidebar && sidebar.classList.contains('show')) {
-            sidebar.classList.remove('show');
-        }
-    }
-});
-</script>
 """, unsafe_allow_html=True)
 
 st.markdown(
