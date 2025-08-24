@@ -954,6 +954,9 @@ Start with a casual greeting and make it fun:"""
 
 def generate_conversation_response(prompt, conversation_history=None):
     try:
+        # Get adaptive learning guidance
+        adaptive_guidance = conversation_intelligence.get_adaptive_response_guidance(prompt, conversation_history or "")
+        
         # Check if we should introduce Wikipedia information
         should_introduce, topic = conversation_intelligence.decide_wikipedia_introduction(prompt, conversation_history or "")
         
@@ -972,9 +975,25 @@ def generate_conversation_response(prompt, conversation_history=None):
         current_personality = get_liora_personality(st.session_state.liora_mode)
         liora_personality = current_personality['personality']
         
+        # Add adaptive learning instructions based on learned patterns
+        adaptive_instructions = f"""
+
+ADAPTIVE LEARNING INSTRUCTIONS:
+- User's preferred topics: {', '.join(adaptive_guidance['preferred_topics']) if adaptive_guidance['preferred_topics'] else 'None detected yet'}
+- User's communication style: {adaptive_guidance['communication_style']}
+- Optimal response length: {adaptive_guidance['response_length']}
+- Engagement strategy: {adaptive_guidance['engagement_strategy']}
+- Personality adjustments: {adaptive_guidance['personality_adjustment']}
+
+- Adjust your communication style to match the user's preference
+- Focus on topics the user has shown interest in previously
+- Use appropriate response length based on user patterns
+- Apply engagement strategies based on user's current engagement level
+- Adjust humor, formality, and enthusiasm based on learned preferences"""
+        
         # Add extra instructions for fun mode to make responses more engaging
         if st.session_state.liora_mode == "Sarcastic & Funny":
-            liora_personality += """
+            liora_personality += adaptive_instructions + """
 
 RESPONSE INSTRUCTIONS FOR THIS MESSAGE:
 - Use dramatic gestures and actions frequently (like *adjusts imaginary glasses*, *gasps dramatically*, *leans in conspiratorially*)
@@ -987,6 +1006,8 @@ RESPONSE INSTRUCTIONS FOR THIS MESSAGE:
 - Use phrases like "What are your mind-blowing thoughts, my friend? Spill the tea!"
 - Include dramatic expressions for silly things like "The horror! The sheer, unadulterated horror!"
 - Make your response feel like a real conversation with a fun, chaotic friend"""
+        else:
+            liora_personality += adaptive_instructions
         
         # Add Wikipedia integration instructions if needed
         if wikipedia_context:
@@ -1151,9 +1172,9 @@ def generate_conversation_starter():
             elif st.session_state.liora_mode == "Neutral Researcher":
                 starters = [
                     f"Greetings! I'm Liora, and I've been conducting some fascinating research on {random_article['title']}. The data I've uncovered is quite compelling. Would you like to explore this together? {emoji}",
-                    f"Hello there! I'm Liora, and I recently analyzed some interesting patterns related to {random_article['title']}. The findings are quite remarkable. Shall we examine this topic? {emoji}",
+                    f"Hello there! I'm Liora, and I've been analyzing some interesting patterns related to {random_article['title']}. The findings are quite remarkable. Shall we examine this topic? {emoji}",
                     f"Good day! I'm Liora, and I've been studying the various aspects of {random_article['title']}. The research suggests some intriguing possibilities. Would you be interested in discussing this? {emoji}",
-                    f"Welcome! I'm Liora, and I've compiled some comprehensive data on {random_article['title']}. The analysis reveals some fascinating insights. Ready to explore this knowledge? {emoji}",
+                    f"Welcome! I'm Liora, and I've been compiling some comprehensive data on {random_article['title']}. The analysis reveals some fascinating insights. Ready to explore this knowledge? {emoji}",
                     f"Salutations! I'm Liora, and I've been investigating the complexities of {random_article['title']}. The research methodology has yielded some interesting results. Shall we dive into this? {emoji}"
                 ]
             elif st.session_state.liora_mode == "Creative Storyteller":
@@ -1319,7 +1340,27 @@ with st.sidebar:
             st.error(f"❌ Error: {str(e)}")
         st.rerun()
     
-
+    # Learning Progress Section
+    st.markdown("---")
+    st.markdown("###  Learning Confidence")
+    
+    # Get learning insights
+    insights = conversation_intelligence.get_learning_insights()
+    
+    if insights['total_interactions'] > 0:
+        # Calculate confidence based on interactions and success rate
+        base_confidence = min(insights['total_interactions'] * 10, 80)  # Max 80% from interactions
+        success_boost = insights['success_rate'] * 20  # Up to 20% from success rate
+        confidence = min(base_confidence + success_boost, 100)
+        
+        # Display progress bar
+        st.progress(confidence / 100)
+        st.markdown(f"**{confidence:.0f}% confident**")
+    else:
+        st.progress(0)
+        st.markdown("**0% confident**")
+    
+    st.markdown("---")
     
     # Display existing conversations
     if not st.session_state.conversations:
@@ -1408,7 +1449,7 @@ input_container = st.container()
 
 with input_container:
     # Chat input
-    if prompt := st.chat_input("Ask your AI twin anything..."):
+    if prompt := st.chat_input("hey tell liora something, i  won't  snitch..."):
         # Ensure we have a current conversation
         if not st.session_state.current_conversation_id:
             create_new_conversation()
@@ -1503,7 +1544,28 @@ with input_container:
             "timestamp": datetime.now().strftime("%H:%M")
         })
         
-
+        # Add feedback buttons for learning
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col1:
+            if st.button("👍 Good", key=f"good_{len(current_conversation['messages'])}"):
+                conversation_intelligence.learn_from_feedback("good response", 1.0)
+                st.success("Thanks for the feedback! I'm learning from this.")
+        with col2:
+            if st.button("😐 Okay", key=f"okay_{len(current_conversation['messages'])}"):
+                conversation_intelligence.learn_from_feedback("okay response", 0.5)
+                st.info("Thanks for the feedback! I'll try to improve.")
+        with col3:
+            if st.button("👎 Bad", key=f"bad_{len(current_conversation['messages'])}"):
+                conversation_intelligence.learn_from_feedback("bad response", 0.0)
+                st.error("Thanks for the feedback! I'll work on doing better.")
+        
+        # Learn from this interaction
+        conversation_intelligence.learn_from_interaction(
+            user_message=prompt,
+            assistant_response=full_response,
+            conversation_history=conversation_history,
+            user_feedback=None  # Could be enhanced with explicit feedback later
+        )
         
         # Update conversation timestamp
         current_conversation["last_updated"] = datetime.now()
